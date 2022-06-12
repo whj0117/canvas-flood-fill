@@ -8,14 +8,20 @@
     <!-- <button @click="getNum">截图</button> -->
     <button @click="generateCanvas">一键生成</button>
     <canvas id="canvas" ref="resultCanvas" width="1148" height="870"></canvas>
-    <div @click="wire"></div>
+    <div>
+      <ul class="colorWrapper">
+        <li :class="['colorList', { checked: oIndex === index }]" v-for="(item, index) in colorArr" :key="item"
+          @click="toggleColor(index)" :style="{ backgroundColor: `#${item}` }"></li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
 import { floodFillLinear } from '../utils/floodFillLinear'
-import { dataArr } from '../utils/common'
+import { dataArr, colorArr } from '../utils/common'
 import { hexToRgb, randomColor, downloadResult } from '../utils/utils'
+import canvasImg from '@assets/img/img_canvas2.jpg'
 const canvasNum = 1
 export default {
   name: 'canvasFill',
@@ -23,17 +29,25 @@ export default {
   },
   data() {
     return {
+      colorArr: colorArr,
       chooseColor: null,
       count: 0,
       myCanvas: null,
       ctx: null,
-      countNum: 0
+      countNum: 0,
+      oIndex: null,
+      isColor:true
     }
   },
   mounted() {
     this.init()
   },
   methods: {
+    toggleColor(index) {
+      this.oIndex = index
+      this.isColor = true
+      this.RepeatRender()
+    },
     init() {
       if (this.ctx) {
         this.count = 0;
@@ -47,16 +61,17 @@ export default {
       image.onload = () => {
         this.ctx.drawImage(image, 0, -100);
       };
-      image.src = '/img/img_canvas2.jpg';
+      // image.src = canvasImg;
     },
     generateCanvas() {
+      this.isColor = false
       this.RepeatRender()
     },
     RepeatRender() {
       let timer = null
       if (this.count >= dataArr.length - 1) {
-        console.log('>>>>>>>>>>>>>>>>>>', this.count)
         clearTimeout(timer);
+        if(this.isColor) return false
         downloadResult(this.$refs.resultCanvas)
         this.countNum++
         this.init()
@@ -77,16 +92,35 @@ export default {
         this.RepeatRender();
       }, 100);
     },
-    wire() {
-      if (!this.chooseColor) {
-        alert('请选择要填充的颜色');
-        return false;
-      }
-    },
-
   }
 }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
+.colorWrapper {
+  background-color: #fff;
+  border-radius: 29px;
+  padding: 8px;
+  position: absolute;
+  left: 28px;
+  top: 680px;
+  /*width:700px;*/
+  z-index: 10;
+
+  .colorList {
+    width: 81px;
+    height: 81px;
+    margin: 10px 8px;
+    border-radius: 50%;
+    float: left;
+    overflow: hidden;
+    text-indent: -9999px;
+
+    &.checked {
+      background-image: url('@assets/img/color_checked.png');
+      background-repeat: no-repeat;
+      background-position: 0 0;
+    }
+  }
+}
 </style>

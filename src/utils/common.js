@@ -3,6 +3,23 @@
  * @Date: 2022-06-11 19:03:42
  * @LastEditors: wanghongjian
  */
+export const colorArr = [
+  '000000',
+  '0050a1',
+  '02a1e3',
+  'abdced',
+  'ef790b',
+  'f8bc28',
+  '96c730',
+  'd3e6ba',
+  'f79ab5',
+  'e1147f',
+  'ffff00',
+  'a1488e',
+  'ee0000',
+  '4d9b46',
+  'ffffff',
+];
 export const dataArr = [
     { left: 140, top: 428 },
     { left: 151, top: 410 },
