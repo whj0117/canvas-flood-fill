@@ -11,7 +11,7 @@
       <canvas id="canvas" ref="resultCanvas" width="1148" height="870"></canvas>
       <div class="wire" ref="wire" @click="wireClick"></div>
     </div>
-    <div>
+    <div v-if="isColor">
       <ul class="colorWrapper">
         <li :class="['colorList', { checked: oIndex === index }]" v-for="(item, index) in colorArr" :key="item"
           @click="toggleColor(item, index)" :style="{ backgroundColor: `#${item}` }"></li>
@@ -24,7 +24,7 @@
 import { floodFillLinear } from '../utils/floodFillLinear'
 import { dataArr, colorArr } from '../utils/common'
 import { hexToRgb, randomColor, downloadResult,getOffsetSum } from '../utils/utils'
-// import canvasImg from '@assets/img/img_canvas2.jpg'
+import canvasImg from '@assets/img/img_canvas2.jpg'
 const canvasNum = 1
 export default {
   name: 'canvasFill',
@@ -64,7 +64,7 @@ export default {
       image.onload = () => {
         this.ctx.drawImage(image, 0, -100);
       };
-      image.src = canvasImg;
+      // image.src = canvasImg;
     },
     wireClick(e) {
       if (!this.chooseColor) {
