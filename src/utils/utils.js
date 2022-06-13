@@ -115,3 +115,17 @@ export const downloadResult = (ele) => {
 		document.body.removeChild(a);
 	});
 }
+
+// 当前元素位于浏览器的偏移量
+export const getOffsetSum = (ele) => {
+	let top = 0, left = 0;
+	while (ele) {
+		top += ele.offsetTop;
+		left += ele.offsetLeft;
+		ele = ele.offsetParent;
+	}
+	return {
+		top,
+		left
+	}
+}

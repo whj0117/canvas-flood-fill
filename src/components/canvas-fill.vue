@@ -4,14 +4,17 @@
  * @LastEditors: wanghongjian
 -->
 <template>
-  <div class="canvasFill">
+  <div class="canvas-fill">
     <!-- <button @click="getNum">截图</button> -->
     <button @click="generateCanvas">一键生成</button>
-    <canvas id="canvas" ref="resultCanvas" width="1148" height="870"></canvas>
+    <div class="draw-wrap">
+      <canvas id="canvas" ref="resultCanvas" width="1148" height="870"></canvas>
+      <div class="wire" ref="wire" @click="wireClick"></div>
+    </div>
     <div>
       <ul class="colorWrapper">
         <li :class="['colorList', { checked: oIndex === index }]" v-for="(item, index) in colorArr" :key="item"
-          @click="toggleColor(index)" :style="{ backgroundColor: `#${item}` }"></li>
+          @click="toggleColor(item, index)" :style="{ backgroundColor: `#${item}` }"></li>
       </ul>
     </div>
   </div>
@@ -20,8 +23,8 @@
 <script>
 import { floodFillLinear } from '../utils/floodFillLinear'
 import { dataArr, colorArr } from '../utils/common'
-import { hexToRgb, randomColor, downloadResult } from '../utils/utils'
-import canvasImg from '@assets/img/img_canvas2.jpg'
+import { hexToRgb, randomColor, downloadResult,getOffsetSum } from '../utils/utils'
+// import canvasImg from '@assets/img/img_canvas2.jpg'
 const canvasNum = 1
 export default {
   name: 'canvasFill',
@@ -36,17 +39,17 @@ export default {
       ctx: null,
       countNum: 0,
       oIndex: null,
-      isColor:true
+      isColor: true
     }
   },
   mounted() {
     this.init()
   },
   methods: {
-    toggleColor(index) {
+    toggleColor(item, index) {
+      this.chooseColor = item
       this.oIndex = index
       this.isColor = true
-      this.RepeatRender()
     },
     init() {
       if (this.ctx) {
@@ -61,7 +64,31 @@ export default {
       image.onload = () => {
         this.ctx.drawImage(image, 0, -100);
       };
-      // image.src = canvasImg;
+      image.src = canvasImg;
+    },
+    wireClick(e) {
+      if (!this.chooseColor) {
+        alert('请选择要填充的颜色');
+        return false;
+      }
+      e = e.originalEvent || e;
+      let wireOffset = getOffsetSum(this.$refs['wire']);
+      let left = Math.floor(e.pageX - wireOffset.left);
+      let top = Math.floor(e.pageY - wireOffset.top);
+      let imgData = this.ctx.getImageData(left, top, 1, 1);
+      let colorArr = imgData.data;
+      if (colorArr[0] === 0 && colorArr[1] === 0 && colorArr[2] === 0 && colorArr[3] === 0) {
+        alert('此处不能上色');
+        return false;
+      }
+      //判断是否点在线条上
+      if (colorArr[0] < 50 && colorArr[1] < 50 && colorArr[2] < 50 && colorArr[3] === 255) {
+        alert('线条处不能上色');
+        return false;
+      }
+      let fillColor = hexToRgb(this.chooseColor).split(',');
+      fillColor.push(255);
+      floodFillLinear(this.myCanvas, left, top, fillColor, 80);
     },
     generateCanvas() {
       this.isColor = false
@@ -71,7 +98,7 @@ export default {
       let timer = null
       if (this.count >= dataArr.length - 1) {
         clearTimeout(timer);
-        if(this.isColor) return false
+        if (this.isColor) return false
         downloadResult(this.$refs.resultCanvas)
         this.countNum++
         this.init()
@@ -97,6 +124,23 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.draw-wrap {
+  width: 1148px;
+  height: 870px;
+  position: absolute;
+  top: 10%;
+  left: 54px;
+
+  .wire {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  }
+}
+
 .colorWrapper {
   background-color: #fff;
   border-radius: 29px;
